@@ -365,7 +365,16 @@ let value = split.next().context(SyntaxSnafu)?;
 На итоговое сообщение верхнего уровня возлагается обязанность проследить всю
 цепочку ошибок.  Это, хотя и несложная, но громоздкая процедура, поэтому
 существуют специальные крейты для форматирования сообщений об ошибках. В нашем
-примере используется крейт display_error_chain.
+примере используется крейт **display_error_chain**:
+```Rust
+fn main() {
+    use display_error_chain::DisplayErrorChain as report;
+
+    if let Err(err) = rep::process(Options::parse()) {
+        eprintln!("{}", report::new(err));
+        std::process::exit(1);
+    }
+}```
 
 ### Проектируйте сверху вниз: сначала ошибки модуля, потом ошибки зависимых модулей
 
