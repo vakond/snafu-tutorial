@@ -211,7 +211,7 @@ mod rep {
 
 Другое решение – явное преобразование одного типа ошибки в другой при помощи
 метода `Result::map_err`.  Этот метод универсален (и в конечном итоге
-используется в **SNAFU**).  Он, в принципе, позволяет добавить любую информацию в
+используется в глубинах **SNAFU**).  Он, в принципе, позволяет добавить любую информацию в
 точке преобразования. Главный его недостаток – быстро нарастающая громоздкость
 записи, что лишает смысла магию знака вопроса. Кроме того, преобразование
 `Option` в `Result` выглядит по-другому – `Option::ok_or`, что мешает
@@ -246,7 +246,236 @@ mod rep {
 <summary markdown="span">Программа screp 0.3.0: фильтровать по регулярным выражениям (как
 grep), распознавать параметры, значения и комментарии</summary>
 
-https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=65c188ed27a7dab7c7c9c5e9f07009ce
+```Rust
+//! Simple config reader & expression parser. Parse and grep UnixConf files.
+//! Examples:
+//!     screp /etc/resolv.conf
+//!     screp -s lan /etc/resolv.conf
+//!     screp -ps namespace /etc/resolv.conf
+//!     screp -vs 192 /etc/resolv.conf
+//!     screp -cs Generated /etc/resolv.conf
+//!     screp -is g /etc/resolv.conf
+
+use clap::Parser;
+use std::path::PathBuf;
+
+/// Simple config reader & expression parser. Parse and grep UnixConf files.
+#[derive(Debug, Parser)]
+struct Options {
+    /// Search case insensitive.
+    #[clap(short, long)]
+    insensitive: bool,
+
+    /// Search in parameters only.
+    #[clap(short, long)]
+    param: bool,
+
+    /// Search in values only.
+    #[clap(short, long)]
+    value: bool,
+
+    /// Search in comments only.
+    #[clap(short, long)]
+    comment: bool,
+
+    /// Regular expression. Dump all lines if not set.
+    #[clap(short, long)]
+    search: Option<String>,
+
+    /// Name of the input file.
+    filename: PathBuf,
+}
+
+fn main() {
+    use display_error_chain::DisplayErrorChain as report;
+
+    if let Err(err) = rep::process(Options::parse()) {
+        eprintln!("{}", report::new(err));
+        std::process::exit(1);
+    }
+}
+
+mod rep {
+    use snafu::prelude::*;
+    use std::{fs, io, path::PathBuf};
+
+    #[derive(Debug, Snafu)]
+    pub enum Error {
+        #[snafu(display("Wrong option: {reason}"))]
+        Option { reason: &'static str },
+
+        #[snafu(display("Could not open {:?}", filename))]
+        Open {
+            source: io::Error,
+            filename: PathBuf,
+        },
+
+        #[snafu(display("Could not interpret file {:?}", filename))]
+        Read {
+            source: reader::Error,
+            filename: PathBuf,
+        },
+    }
+
+    pub fn process(opts: crate::Options) -> Result<(), Error> {
+        check(&opts)?;
+        let filename = opts.filename;
+        let file = fs::File::open(&filename).context(OpenSnafu {
+            filename: filename.clone(),
+        })?;
+        if let Some(pattern) = opts.search {
+            reader::filter(
+                opts.insensitive,
+                opts.param,
+                opts.value,
+                opts.comment,
+                pattern,
+                io::BufReader::new(file),
+            )
+            .context(ReadSnafu {
+                filename: filename.clone(),
+            })?;
+        } else {
+            reader::dump(io::BufReader::new(file)).context(ReadSnafu { filename })?;
+        }
+        Ok(())
+    }
+
+    fn check(opts: &crate::Options) -> Result<(), Error> {
+        if opts.search.is_none() {
+            ensure!(
+                !opts.insensitive,
+                OptionSnafu {
+                    reason: "-i without -s"
+                }
+            );
+            ensure!(
+                !opts.param,
+                OptionSnafu {
+                    reason: "-p without -s"
+                }
+            );
+            ensure!(
+                !opts.value,
+                OptionSnafu {
+                    reason: "-v without -s"
+                }
+            );
+            ensure!(
+                !opts.comment,
+                OptionSnafu {
+                    reason: "-c without -s"
+                }
+            );
+        }
+        Ok(())
+    }
+
+    mod reader {
+        use regex::RegexBuilder;
+        use snafu::prelude::*;
+        use std::io;
+
+        #[derive(Debug, Snafu)]
+        pub enum Error {
+            #[snafu(display("Could not read"))]
+            Read { source: io::Error },
+
+            #[snafu(display("Could not parse line {n}"))]
+            Parse { source: parser::Error, n: usize },
+
+            #[snafu(display("Invalid regular expression"))]
+            Regex { source: regex::Error },
+        }
+
+        pub fn dump<R: io::BufRead>(reader: R) -> Result<(), Error> {
+            for line in reader.lines() {
+                println!("{}", line.context(ReadSnafu)?);
+            }
+            Ok(())
+        }
+
+        pub fn filter<R: io::BufRead>(
+            insensitive: bool,
+            check_param: bool,
+            check_value: bool,
+            check_comment: bool,
+            pattern: String,
+            reader: R,
+        ) -> Result<(), Error> {
+            let regex = RegexBuilder::new(&pattern)
+                .case_insensitive(insensitive)
+                .build()
+                .context(RegexSnafu)?;
+            for (n, line) in reader.lines().enumerate() {
+                let n = n + 1; // Let's count lines from 1
+                let line = line.context(ReadSnafu)?;
+                if is_string_whitespace(&line) {
+                    continue;
+                }
+                let (param, value, comment) = parser::parse(&line).context(ParseSnafu { n })?;
+                let mut show = if !check_param && !check_value && !check_comment {
+                    regex.is_match(&line)
+                } else {
+                    false
+                };
+                if check_param {
+                    show = show || regex.is_match(&param);
+                }
+                if check_value {
+                    show = show || regex.is_match(&value);
+                }
+                if check_comment {
+                    show = show || regex.is_match(&comment);
+                }
+                if show {
+                    println!("{line}");
+                }
+            }
+            Ok(())
+        }
+
+        fn is_string_whitespace(s: &str) -> bool {
+            s.chars().all(|c| c.is_whitespace())
+        }
+
+        mod parser {
+            use snafu::prelude::*;
+
+            #[derive(Debug, Snafu)]
+            pub enum Error {
+                #[snafu(display("Unsupported file format"))]
+                Syntax,
+            }
+
+            /// Return parts of a config line: param, value and comment (if any).
+            pub fn parse(line: &str) -> Result<(String, String, String), Error> {
+                let mut split = line.split_whitespace();
+
+                let param = split.next().context(SyntaxSnafu)?;
+                if param.starts_with('#') {
+                    return Ok((String::default(), String::default(), line.to_string()));
+                }
+
+                let value = split.next().context(SyntaxSnafu)?;
+
+                let mut comment = String::default();
+                if let Some(third) = split.next() {
+                    if !third.starts_with('#') {
+                        return SyntaxSnafu.fail()?;
+                    } else {
+                        let mut split = line.split('#');
+                        let _ = split.next().context(SyntaxSnafu)?;
+                        comment = split.next().context(SyntaxSnafu)?.to_string();
+                    }
+                }
+
+                Ok((param.to_string(), value.to_string(), format!("#{comment}")))
+            }
+        }
+    }
+}
+```
 </details>
 
 Типичный пример определения ошибки с контекстом.
@@ -280,7 +509,7 @@ use snafu::prelude::*;
 ```
 
 Обратите внимание, как ошибка `Error::Open` ссылается на `io::Error` благодаря
-существованию поля `source`.
+существованию поля `source` (см. третье правило).
 
 ### Описывайте ошибки на уровне модуля
 
