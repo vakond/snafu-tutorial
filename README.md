@@ -254,7 +254,7 @@ https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=65c188ed
 ```Rust
 use snafu::prelude::*;
 
-Определение:
+    // Определение:
     #[derive(Debug, Snafu)]
     pub enum Error {
         #[snafu(display("Could not open {:?}", filename))]
@@ -265,13 +265,15 @@ use snafu::prelude::*;
         ...
     }
 
-Сигнатура функции:
+    // Сигнатура функции:
     pub fn process(...) -> Result<(), Error>
 
-Использование:
+    // Использование:
     let file = fs::File::open(&filename).context(OpenSnafu { filename })?;
+```
 
 Итоговый вывод:
+```
     Could not open "/tmp/nonexist"
     Caused by:
       -> No such file or directory (os error 2)
@@ -318,6 +320,7 @@ use snafu::prelude::*;
 
 Обратите внимание, как ошибки в модуле reader могут ссылаться на ошибки
 используемого модуля parser:
+
 ```Rust
     #[snafu(display("Could not parse line {n}"))]
     Parse { source: parser::Error, n: usize },
