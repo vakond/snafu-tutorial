@@ -92,14 +92,14 @@ mod rep {
     }
 
     mod reader {
-	use std::io;
-
-	pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
-	    for line in reader.lines() {
-                println!("{}", line?);
+        use std::io;
+         
+        pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
+            for line in reader.lines() {
+         	println!("{}", line?);
             }
-	    Ok(())
-	}
+            Ok(())
+        }
     }
 }
 ```
