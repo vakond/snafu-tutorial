@@ -135,8 +135,8 @@ match line_result {
 ```Rust
 pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
     for line in reader.lines() {
-	let (param, value) = parser::parse(line?)?;
-	println!("{param} = {value}");
+        let (param, value) = parser::parse(line?)?;
+        println!("{param} = {value}");
     }
     Ok(())
 }
