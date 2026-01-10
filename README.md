@@ -496,22 +496,22 @@ mod rep {
 ```Rust
 use snafu::prelude::*;
 
-    // Определение:
-    #[derive(Debug, Snafu)]
-    pub enum Error {
-	#[snafu(display("Could not open {:?}", filename))]
-	Open {
-	    source: io::Error,
-	    filename: PathBuf,
-	},
-	...
-    }
+// Определение:
+#[derive(Debug, Snafu)]
+pub enum Error {
+#[snafu(display("Could not open {:?}", filename))]
+    Open {
+        source: io::Error,
+        filename: PathBuf,
+    },
+...
+}
 
-    // Сигнатура функции:
-    pub fn process(...) -> Result<(), Error>
+// Сигнатура функции:
+pub fn process(...) -> Result<(), Error>
 
-    // Использование:
-    let file = fs::File::open(&filename).context(OpenSnafu { filename })?;
+// Использование:
+let file = fs::File::open(&filename).context(OpenSnafu { filename })?;
 ```
 
 Итоговый вывод:
@@ -547,9 +547,10 @@ pub enum Error {
 
 Иерархия модулей в программе **SCREP**
 ```
-└── rep
-    ├── reader
-	├── parser
+top
+    rep
+        reader
+            parser
 ```
 
 ### Добавляйте в ошибку поле `source` для сохранения связи с предыдущей
