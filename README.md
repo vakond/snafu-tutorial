@@ -88,14 +88,14 @@ mod rep {
     use std::io;
 
     pub fn process() -> io::Result<()> {
-	reader::read(io::stdin().lock())
+        reader::read(io::stdin().lock())
     }
 
     mod reader {
 	use std::io;
 
 	pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
-            for line in reader.lines() {
+	    for line in reader.lines() {
                 println!("{}", line?);
             }
 	    Ok(())
