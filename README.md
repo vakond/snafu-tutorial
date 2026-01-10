@@ -4,7 +4,7 @@
 
 "Errors are values" – Rob Pike
 
-## TLDR; Правила SNAFU
+## TL;DR Правила SNAFU
 
 - [Контекст превыше всего. Не отбрасывайте контекст без нужды](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#Контекст-превыше-всего.-Не-отбрасывайте-контекст-без-нужды)
 
@@ -110,7 +110,11 @@ mod rep {
 компилятором в примерно такие строки:
 
 ```Rust
-match line_result {
+line?
+```
+=>
+```Rust
+match line {
     Ok(line) => line,
     Err(err) => return Err(err)
 }
@@ -516,9 +520,9 @@ let file = fs::File::open(&filename).context(OpenSnafu { filename })?;
 
 Итоговый вывод:
 ```
-    Could not open "/tmp/nonexist"
-    Caused by:
-      -> No such file or directory (os error 2)
+Could not open "/tmp/nonexist"
+Caused by:
+  -> No such file or directory (os error 2)
 ```
 
 Обратите внимание, как ошибка `Error::Open` ссылается на `io::Error` благодаря
@@ -545,7 +549,7 @@ pub enum Error {
 }
 ```
 
-Иерархия модулей в программе **SCREP**
+Иерархия модулей в программе **SCREP**:
 ```
 top
     rep
