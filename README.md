@@ -6,11 +6,12 @@
 
 ### TL;DR (СД;НЧ) Правила SNAFU
 
-1. [Контекст превыше всего. Не отбрасывайте контекст без нужды](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#rule1)
+1. [Контекст превыше всего. Не отбрасывайте контекст без
+нужды](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#rule1)
 
 2. [Описывайте ошибки на уровне модуля, а не крейта. Каждый нетривиальный модуль
-  будет иметь свой набор ошибок. Иерархия ошибок будет воспроизводить иерархию
-  модулей](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#rule2)
+будет иметь свой набор ошибок. Иерархия ошибок будет воспроизводить иерархию
+модулей](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#rule2)
 
 3. [Добавляйте в ошибку поле source (см. ниже) для сохранения связи
 с "родительской" ошибкой](https://github.com/vakond/snafu-tutorial/blob/main/README.md/#rule3)
@@ -643,8 +644,8 @@ fn main() {
     use display_error_chain::DisplayErrorChain as report;
 
     if let Err(err) = rep::process(Options::parse()) {
-	eprintln!("{}", report::new(err));
-	std::process::exit(1);
+        eprintln!("{}", report::new(err));
+        std::process::exit(1);
     }
 }
 ```
