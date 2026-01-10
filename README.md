@@ -79,8 +79,8 @@ Rust предоставляет краткий "магический" спосо
 
 fn main() {
     if let Err(err) = rep::process() {
-	eprintln!("{err}");
-	std::process::exit(1)
+        eprintln!("{err}");
+        std::process::exit(1)
     }
 }
 
@@ -95,9 +95,9 @@ mod rep {
 	use std::io;
 
 	pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
-	    for line in reader.lines() {
-		println!("{}", line?);
-	    }
+            for line in reader.lines() {
+                println!("{}", line?);
+            }
 	    Ok(())
 	}
     }
