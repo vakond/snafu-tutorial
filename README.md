@@ -167,8 +167,8 @@ fn main() {
     let _ = args.next().expect("Отсутствует имя файла программы");
     let file = args.next().expect("Не задано имя входного файла");
     if let Err(err) = rep::process(file) {
-	eprintln!("{err}");
-	std::process::exit(1)
+        eprintln!("{err}");
+        std::process::exit(1)
     }
 }
 
@@ -176,8 +176,8 @@ mod rep {
     use std::{fs, io};
 
     pub fn process(file: String) -> crate::GenericResult<()> {
-	let file = fs::File::open(file)?;
-	reader::read(io::BufReader::new(file))
+        let file = fs::File::open(file)?;
+        reader::read(io::BufReader::new(file))
     }
 
     mod reader {
@@ -185,8 +185,8 @@ mod rep {
 
 	pub fn read<R: io::BufRead>(reader: R) -> crate::GenericResult<()> {
 	    for line in reader.lines() {
-		let (param, value) = parser::parse(line?)?;
-		println!("{param} = {value}");
+                let (param, value) = parser::parse(line?)?;
+                println!("{param} = {value}");
 	    }
 	    Ok(())
 	}
@@ -195,17 +195,17 @@ mod rep {
 	    #[derive(Debug)]
 	    struct Error {}
 	    impl std::fmt::Display for Error {
-		fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-		    write!(f, "Parser Error")
-		}
+                fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    write!(f, "Parser Error")
+                }
 	    }
 	    impl std::error::Error for Error {}
 
 	    pub fn parse(str: String) -> crate::GenericResult<(String, String)> {
-		let mut split = str.split_whitespace();
-		let param = split.next().ok_or(Error {})?;
-		let value = split.next().ok_or(Error {})?;
-		Ok((param.to_string(), value.to_string()))
+                let mut split = str.split_whitespace();
+                let param = split.next().ok_or(Error {})?;
+                let value = split.next().ok_or(Error {})?;
+                Ok((param.to_string(), value.to_string()))
 	    }
 	}
     }
@@ -303,8 +303,8 @@ fn main() {
     use display_error_chain::DisplayErrorChain as report;
 
     if let Err(err) = rep::process(Options::parse()) {
-	eprintln!("{}", report::new(err));
-	std::process::exit(1);
+        eprintln!("{}", report::new(err));
+        std::process::exit(1);
     }
 }
 
@@ -314,178 +314,178 @@ mod rep {
 
     #[derive(Debug, Snafu)]
     pub enum Error {
-	#[snafu(display("Wrong option: {reason}"))]
-	Option { reason: &'static str },
+        #[snafu(display("Wrong option: {reason}"))]
+        Option { reason: &'static str },
 
-	#[snafu(display("Could not open {:?}", filename))]
-	Open {
-	    source: io::Error,
-	    filename: PathBuf,
-	},
+        #[snafu(display("Could not open {:?}", filename))]
+        Open {
+            source: io::Error,
+            filename: PathBuf,
+        },
 
-	#[snafu(display("Could not interpret file {:?}", filename))]
-	Read {
-	    source: reader::Error,
-	    filename: PathBuf,
-	},
+        #[snafu(display("Could not interpret file {:?}", filename))]
+        Read {
+            source: reader::Error,
+            filename: PathBuf,
+        },
     }
 
     pub fn process(opts: crate::Options) -> Result<(), Error> {
-	check(&opts)?;
-	let filename = opts.filename;
-	let file = fs::File::open(&filename).context(OpenSnafu {
-	    filename: filename.clone(),
-	})?;
-	if let Some(pattern) = opts.search {
-	    reader::filter(
-		opts.insensitive,
-		opts.param,
-		opts.value,
-		opts.comment,
-		pattern,
-		io::BufReader::new(file),
-	    )
-	    .context(ReadSnafu {
-		filename: filename.clone(),
-	    })?;
-	} else {
-	    reader::dump(io::BufReader::new(file)).context(ReadSnafu { filename })?;
-	}
-	Ok(())
+        check(&opts)?;
+        let filename = opts.filename;
+        let file = fs::File::open(&filename).context(OpenSnafu {
+            filename: filename.clone(),
+        })?;
+        if let Some(pattern) = opts.search {
+            reader::filter(
+                opts.insensitive,
+                opts.param,
+                opts.value,
+                opts.comment,
+                pattern,
+                io::BufReader::new(file),
+            )
+            .context(ReadSnafu {
+                filename: filename.clone(),
+            })?;
+        } else {
+            reader::dump(io::BufReader::new(file)).context(ReadSnafu { filename })?;
+        }
+        Ok(())
     }
 
     fn check(opts: &crate::Options) -> Result<(), Error> {
-	if opts.search.is_none() {
-	    ensure!(
-		!opts.insensitive,
-		OptionSnafu {
-		    reason: "-i without -s"
-		}
-	    );
-	    ensure!(
-		!opts.param,
-		OptionSnafu {
-		    reason: "-p without -s"
-		}
-	    );
-	    ensure!(
-		!opts.value,
-		OptionSnafu {
-		    reason: "-v without -s"
-		}
-	    );
-	    ensure!(
-		!opts.comment,
-		OptionSnafu {
-		    reason: "-c without -s"
-		}
-	    );
-	}
-	Ok(())
+        if opts.search.is_none() {
+            ensure!(
+                !opts.insensitive,
+                OptionSnafu {
+                    reason: "-i without -s"
+                }
+            );
+            ensure!(
+                !opts.param,
+                OptionSnafu {
+                    reason: "-p without -s"
+                }
+            );
+            ensure!(
+                !opts.value,
+                OptionSnafu {
+                    reason: "-v without -s"
+                }
+            );
+            ensure!(
+                !opts.comment,
+                OptionSnafu {
+                    reason: "-c without -s"
+                }
+            );
+        }
+        Ok(())
     }
 
     mod reader {
-	use regex::RegexBuilder;
-	use snafu::prelude::*;
-	use std::io;
+        use regex::RegexBuilder;
+        use snafu::prelude::*;
+        use std::io;
 
-	#[derive(Debug, Snafu)]
-	pub enum Error {
-	    #[snafu(display("Could not read"))]
-	    Read { source: io::Error },
+        #[derive(Debug, Snafu)]
+        pub enum Error {
+            #[snafu(display("Could not read"))]
+            Read { source: io::Error },
 
-	    #[snafu(display("Could not parse line {n}"))]
-	    Parse { source: parser::Error, n: usize },
+            #[snafu(display("Could not parse line {n}"))]
+            Parse { source: parser::Error, n: usize },
 
-	    #[snafu(display("Invalid regular expression"))]
-	    Regex { source: regex::Error },
-	}
+            #[snafu(display("Invalid regular expression"))]
+            Regex { source: regex::Error },
+        }
 
-	pub fn dump<R: io::BufRead>(reader: R) -> Result<(), Error> {
-	    for line in reader.lines() {
-		println!("{}", line.context(ReadSnafu)?);
-	    }
-	    Ok(())
-	}
+        pub fn dump<R: io::BufRead>(reader: R) -> Result<(), Error> {
+            for line in reader.lines() {
+                println!("{}", line.context(ReadSnafu)?);
+            }
+            Ok(())
+        }
 
-	pub fn filter<R: io::BufRead>(
-	    insensitive: bool,
-	    check_param: bool,
-	    check_value: bool,
-	    check_comment: bool,
-	    pattern: String,
-	    reader: R,
-	) -> Result<(), Error> {
-	    let regex = RegexBuilder::new(&pattern)
-		.case_insensitive(insensitive)
-		.build()
-		.context(RegexSnafu)?;
-	    for (n, line) in reader.lines().enumerate() {
-		let n = n + 1; // Let's count lines from 1
-		let line = line.context(ReadSnafu)?;
-		if is_string_whitespace(&line) {
-		    continue;
-		}
-		let (param, value, comment) = parser::parse(&line).context(ParseSnafu { n })?;
-		let mut show = if !check_param && !check_value && !check_comment {
-		    regex.is_match(&line)
-		} else {
-		    false
-		};
-		if check_param {
-		    show = show || regex.is_match(&param);
-		}
-		if check_value {
-		    show = show || regex.is_match(&value);
-		}
-		if check_comment {
-		    show = show || regex.is_match(&comment);
-		}
-		if show {
-		    println!("{line}");
-		}
-	    }
-	    Ok(())
-	}
+        pub fn filter<R: io::BufRead>(
+            insensitive: bool,
+            check_param: bool,
+            check_value: bool,
+            check_comment: bool,
+            pattern: String,
+            reader: R,
+        ) -> Result<(), Error> {
+            let regex = RegexBuilder::new(&pattern)
+                .case_insensitive(insensitive)
+                .build()
+                .context(RegexSnafu)?;
+            for (n, line) in reader.lines().enumerate() {
+                let n = n + 1; // Let's count lines from 1
+                let line = line.context(ReadSnafu)?;
+                if is_string_whitespace(&line) {
+                    continue;
+                }
+                let (param, value, comment) = parser::parse(&line).context(ParseSnafu { n })?;
+                let mut show = if !check_param && !check_value && !check_comment {
+                    regex.is_match(&line)
+                } else {
+                    false
+                };
+                if check_param {
+                    show = show || regex.is_match(&param);
+                }
+                if check_value {
+                    show = show || regex.is_match(&value);
+                }
+                if check_comment {
+                    show = show || regex.is_match(&comment);
+                }
+                if show {
+                    println!("{line}");
+                }
+            }
+            Ok(())
+        }
 
-	fn is_string_whitespace(s: &str) -> bool {
-	    s.chars().all(|c| c.is_whitespace())
-	}
+        fn is_string_whitespace(s: &str) -> bool {
+            s.chars().all(|c| c.is_whitespace())
+        }
 
-	mod parser {
-	    use snafu::prelude::*;
+        mod parser {
+            use snafu::prelude::*;
 
-	    #[derive(Debug, Snafu)]
-	    pub enum Error {
-		#[snafu(display("Unsupported file format"))]
-		Syntax,
-	    }
+            #[derive(Debug, Snafu)]
+            pub enum Error {
+                #[snafu(display("Unsupported file format"))]
+                Syntax,
+            }
 
-	    /// Return parts of a config line: param, value and comment (if any).
-	    pub fn parse(line: &str) -> Result<(String, String, String), Error> {
-		let mut split = line.split_whitespace();
+            /// Return parts of a config line: param, value and comment (if any).
+            pub fn parse(line: &str) -> Result<(String, String, String), Error> {
+                let mut split = line.split_whitespace();
 
-		let param = split.next().context(SyntaxSnafu)?;
-		if param.starts_with('#') {
-		    return Ok((String::default(), String::default(), line.to_string()));
-		}
+                let param = split.next().context(SyntaxSnafu)?;
+                if param.starts_with('#') {
+                    return Ok((String::default(), String::default(), line.to_string()));
+                }
 
-		let value = split.next().context(SyntaxSnafu)?;
+                let value = split.next().context(SyntaxSnafu)?;
 
-		let mut comment = String::default();
-		if let Some(third) = split.next() {
-		    if !third.starts_with('#') {
-			return SyntaxSnafu.fail()?;
-		    } else {
-			let mut split = line.split('#');
-			let _ = split.next().context(SyntaxSnafu)?;
-			comment = split.next().context(SyntaxSnafu)?.to_string();
-		    }
-		}
+                let mut comment = String::default();
+                if let Some(third) = split.next() {
+                    if !third.starts_with('#') {
+                        return SyntaxSnafu.fail()?;
+                    } else {
+                        let mut split = line.split('#');
+                        let _ = split.next().context(SyntaxSnafu)?;
+                        comment = split.next().context(SyntaxSnafu)?.to_string();
+                    }
+                }
 
-		Ok((param.to_string(), value.to_string(), format!("#{comment}")))
-	    }
-	}
+                Ok((param.to_string(), value.to_string(), format!("#{comment}")))
+            }
+        }
     }
 }
 ```
@@ -607,7 +607,7 @@ let value = split.next().context(SyntaxSnafu)?;
 Это очень важное правило.  Иногда возникает соблазн сэкономить на описании новой
 ошибки, повторно использовав существующую. Но это приводит к смешению контекстов
 и уменьшает информативность итогового сообщения. Совершенно нормально заводить
-ошибки "на каждый чих".
+ошибки, как говорится, "на каждый чих".
 
 ### Предоставьте выбор формата и объёма сообщения об ошибке самому верхнему уровню
 
