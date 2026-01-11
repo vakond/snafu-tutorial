@@ -578,6 +578,14 @@ top
             parser
 ```
 
+Итоговый вывод при попытке распарсить файл не того формата:
+```
+Could not interpret file "/etc/passwd" -- из модуля rep
+Caused by:
+  -> Could not parse line 1  -- из модуля reader
+  -> Unsupported file format -- из модуля parser
+```
+
 <a name="rule3"></a>
 ### 3. Добавляйте в ошибку поле `source` для сохранения связи с "родительской" ошибкой
 
