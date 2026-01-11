@@ -627,6 +627,9 @@ pub enum Error {
 ensure!(!opts.insensitive, OptionSnafu { reason: "-i without -s" });
 ```
 
+Ошибку без `source` можно также создать, передав её селектор в метод `OptionExt::context`
+(см. пример в следующем правиле).
+
 <a name="rule4"></a>
 ### 4. При обработке ошибки используйте селекторы контекста, а не сами типы ошибок
 
