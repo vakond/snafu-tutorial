@@ -639,6 +639,14 @@ ensure!(!opts.insensitive, OptionSnafu { reason: "-i without -s" });
 
 Пример создания ошибки `Error::Regex`:
 ```Rust
+#[derive(Debug, Snafu)]
+pub enum Error {
+    ...
+    #[snafu(display("Invalid regular expression"))]
+    Regex { source: regex::Error },
+}
+```
+```Rust
 let regex = RegexBuilder::new(&pattern)
     .case_insensitive(insensitive)
     .build()
@@ -646,6 +654,13 @@ let regex = RegexBuilder::new(&pattern)
 ```
 
 Пример создания ошибки по результату `Option`:
+```Rust
+#[derive(Debug, Snafu)]
+pub enum Error {
+    #[snafu(display("Unsupported file format"))]
+    Syntax,
+}
+```
 ```Rust
 let value = split.next().context(SyntaxSnafu)?;
 ```
