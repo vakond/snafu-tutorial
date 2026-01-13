@@ -277,7 +277,7 @@ mod rep {
 //! clap = { version = "4.5", features = ["derive"] }
 //! display-error-chain = "0.2"
 //! regex = "1.12"
-//! snafu = { version = "0.8", features = ["backtrace"] }
+//! snafu = "0.8"
 //!
 //! Examples:
 //!     screp /etc/resolv.conf
