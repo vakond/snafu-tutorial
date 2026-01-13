@@ -498,10 +498,11 @@ mod rep {
                         let mut split = line.split('#');
                         let _ = split.next().context(SyntaxSnafu)?;
                         comment = split.next().context(SyntaxSnafu)?.to_string();
+                        comment = format!("#{comment}");
                     }
                 }
 
-                Ok((param.to_string(), value.to_string(), format!("#{comment}")))
+                Ok((param.to_string(), value.to_string(), comment))
             }
         }
     }
