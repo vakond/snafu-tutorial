@@ -198,33 +198,33 @@ mod rep {
     }
 
     mod reader {
-	use std::io;
+        use std::io;
 
-	pub fn read<R: io::BufRead>(reader: R) -> crate::GenericResult<()> {
-	    for line in reader.lines() {
+        pub fn read<R: io::BufRead>(reader: R) -> crate::GenericResult<()> {
+            for line in reader.lines() {
                 let (param, value) = parser::parse(line?)?;
                 println!("{param} = {value}");
-	    }
-	    Ok(())
-	}
+            }
+            Ok(())
+        }
 
-	mod parser {
-	    #[derive(Debug)]
-	    struct Error {}
-	    impl std::fmt::Display for Error {
+        mod parser {
+            #[derive(Debug)]
+            struct Error {}
+            impl std::fmt::Display for Error {
                 fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                     write!(f, "Parser Error")
                 }
-	    }
-	    impl std::error::Error for Error {}
+            }
+            impl std::error::Error for Error {}
 
-	    pub fn parse(str: String) -> crate::GenericResult<(String, String)> {
+            pub fn parse(str: String) -> crate::GenericResult<(String, String)> {
                 let mut split = str.split_whitespace();
                 let param = split.next().ok_or(Error {})?;
                 let value = split.next().ok_or(Error {})?;
                 Ok((param.to_string(), value.to_string()))
-	    }
-	}
+            }
+        }
     }
 }
 ```
