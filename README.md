@@ -4,7 +4,7 @@ Tags: туториал, программирование, Rust, обработк
 
 Сложность: средняя
 
-*КДПВ*
+![КДПВ](https://github.com/vakond/assets/blob/main/snafu-kdpv.jpg)
 
 "Errors are values" – *Rob Pike*
 
@@ -135,7 +135,8 @@ match line {
 при использовании исключений), при этом сохраняющий обязательность обработки,
 простоту и локальность технологии возврата ошибки.
 
-*(картинка с котиком)* Удалось же?
+![картинка с котиком](https://github.com/vakond/assets/blob/main/snafu-cat.jpg)
+Удалось же?
 
 ### Чёрная магия `Box<dyn Error>`
 
