@@ -135,7 +135,9 @@ match line {
 при использовании исключений), при этом сохраняющий обязательность обработки,
 простоту и локальность технологии возврата ошибки.
 
-<img src="https://github.com/vakond/assets/blob/main/snafu-cat-small.jpg" alt="картинка с котиком" width="400" height="306" />
+<div id="картинка с котиком">
+<img src="https://github.com/vakond/assets/blob/main/snafu-cat-small.jpg" width="400" height="306">
+</div>
 Удалось же?
 
 ### Чёрная магия `Box<dyn Error>`
