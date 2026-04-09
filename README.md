@@ -4,6 +4,8 @@ Tags: туториал, программирование, Rust, обработк
 
 <img src="https://github.com/vakond/assets/blob/main/snafu-kdpv.jpg" alt="КДПВ" width="630"/>
 
+«Нам нужен не всякий программист. Программисты – народ дефицитный, избаловались, а нам нужен небалованный» – *горбоносый*
+
 "Errors are values" – *Rob Pike*
 
 ### TL;DR (СД;НЧ) Правила SNAFU
