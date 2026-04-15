@@ -524,12 +524,13 @@ mod rep {
 Типичный шаблон определения ошибки с контекстом:
 
 ```Rust
+// Подключаем SNAFU:
 use snafu::prelude::*;
 
 // Определение:
 #[derive(Debug, Snafu)]
 pub enum Error {
-#[snafu(display("Could not open {:?}", filename))]
+    #[snafu(display("Could not open {:?}", filename))]
     Open {
         source: io::Error,
         filename: PathBuf,
