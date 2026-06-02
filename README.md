@@ -171,9 +171,12 @@ pub fn read<R: io::BufRead>(reader: R) -> io::Result<()> {
 исполняются машиной».
 
 Другое решение этой проблемы – реализованное в стандартной библиотеке
-соглашение, что все типы ошибок неявно конвертируются в тип
-`Box<dyn std::error::Error + Send + Sync + 'static>`, который и должны возвращать
+(через blanket impl трейта From) соглашение, что все типы ошибок неявно конвертируются
+в тип `Box<dyn std::error::Error + Send + Sync + 'static>`, который и должны возвращать
 функции.
+```Rust
+impl<E: error::Error> From<E> for Box<dyn error::Error>;
+```
 
 ----
 
